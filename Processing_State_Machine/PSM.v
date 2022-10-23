@@ -24,7 +24,7 @@
 */				
 module PSM (
 	input Clock,
-	input Reset,
+	input ResetN,
 	input [7:0] Din1,
 	input [7:0] Din2,
 	input Start,
@@ -46,9 +46,15 @@ localparam op3_state = 3;
 	     ^   ^   ^
 		  |   |   |
 		  X   Y   Z */
-localparam op1_time = 10;	// X cycles
-localparam op2_time = 7;	// Y cycles
-localparam op3_time = 5;	// Z cycles
+// Clock frequency is 50MHz.
+// 10 cycles = 1 seconds.
+localparam op1_time = 50_000_000;	// X = 10 cycles = 1000ms.
+localparam op2_time = 35_000_000;	// Y = 7 cycles = 700ms.
+localparam op3_time = 25_000_000;	// Z = 5 cycles = 500ms.
+
+//localparam op1_time = 100;
+//localparam op2_time = 70;
+//localparam op3_time = 50;
 
 // Define the state and counter variables.
 integer present_state, next_state;
@@ -61,9 +67,9 @@ localparam PSM_ready = 1'b1;
 reg [7:0] sample1, sample2;
 
 // Implementation of the asynchronous and the synchronous processes.
-always @ (posedge Clock or posedge Reset) begin
+always @ (posedge Clock or negedge ResetN) begin
 	// Asynchronous process.
-	if (Reset) begin
+	if (!ResetN) begin
 		present_state <= idle_state;
 		present_counter <= 0;
 		sample1 <= 8'b0;
